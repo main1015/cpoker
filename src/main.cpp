@@ -53,6 +53,7 @@ int main() {
             Card{10, 2},
             Card{13, 3},
             Card{8, 3},
+            
     };
     Card cards[2] = {
 //            Card{4, 0},
