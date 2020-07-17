@@ -21,23 +21,25 @@ CR has_max_three(imat pokers, imat numbers, imat colors){
         int index = b[0];
         cr.cards.row(index) = pokers.row(index);
         // 大于2个相同的牌
-        b = find(numbers.col(0) >= 2);
-        int size = b.size();
+        uvec nb = find(numbers.col(0) >= 2);
+        int size = nb.size();
         if (size > 1){
             // 3,3,1; 3,2,2; 3,2,1,1
             // 葫芦
             cr.model = HOUSE;
             int i = size - 1;
-            for(; i > 0; i--){
-                if(i == index){
+            for(; i >= 0; i--){
+                int ix = nb[i];
+                if(ix == index){
                     continue;
                 }else{
-                    imat row = pokers.row(i);
+//                    imat row = pokers.row(i);
                     int j = 0, n = 0;
-                    for(;j < 4-1; j++){
+                    for(;j < 4; j++){
                         if(n<2){
-                            if(pokers(i, j)){
-                                cr.cards(i, j) = pokers(i, j);
+
+                            if(pokers(ix, j)){
+                                cr.cards(ix, j) = pokers(ix, j);
                                 n++;
                             }
                         }else{
@@ -51,6 +53,17 @@ CR has_max_three(imat pokers, imat numbers, imat colors){
             // 3,1,1,1,1
             has_straight_with_flush(&cr, pokers, numbers, colors);
             // 出现大于5张同色的牌
+            if(cr.model == UNKNOWN){
+                // 三条
+                cr.model = THREE_ARTICLE;
+                uvec ob = find(numbers.col(0) == 1 );
+                int os = ob.size();
+                for(int i=os-1, j=0; i>=0, j<2; i--,j++){
+                    int ix = ob[i];
+                    uvec r = find(pokers.row(ix) == 1);
+                    cr.cards(ix, r[0]) = 1;
+                }
+            }
         }
     }
 
@@ -66,7 +79,7 @@ CR has_max_one(imat pokers, imat numbers, imat colors){
 }
 
 
-CR has_straight_with_flush(CR* cr, imat pokers, imat numbers, imat colors){
+void has_straight_with_flush(CR* cr, imat pokers, imat numbers, imat colors){
     // 出现大于5张同色的牌
     uvec b = find(colors.row(0) >= 5 );
     int size = b.size();
@@ -78,7 +91,6 @@ CR has_straight_with_flush(CR* cr, imat pokers, imat numbers, imat colors){
         // 取出某种色的数组
         imat _color = pokers.col(i);
         SR sr = is_straight(_color);
-        cout << "model:" <<sr.model << endl;
         if(sr.model == STRAIGHT){
             // 同花顺
             cr->model = STRAIGHT_WITH_FLUSH;
@@ -87,11 +99,35 @@ CR has_straight_with_flush(CR* cr, imat pokers, imat numbers, imat colors){
                 int ix = sr.indexs[j];
                 cr->cards(ix, i) = 1;
             }
+            if(sr.indexs[0] == 10-2){
+                // 皇家同花顺
+                cr->model = ROYAL_FLUSH;
+            }
+
+        }else{
+            // 同花
+            size = sr.indexs.size();
+            for(int j=0; j<size;j++){
+                int ix = sr.indexs[j];
+                cr->cards(ix, i) = 1;
+            }
 
         }
-//        sr.indexs.print("sr-->");
     }else{
-//        SR sr = is_straight(_color);
+        SR sr = is_straight(numbers);
+        if(sr.model == STRAIGHT){
+            // 顺子
+            cr->model = STRAIGHT;
+            cr->cards.fill(0);
+
+            size = sr.indexs.size();
+            for(int j=0; j<size;j++){
+                int ix = sr.indexs[j];
+                uvec r = find(pokers.row(ix) == 1);
+                cr->cards(ix, r[0]) = 1;
+            }
+        }
+
     }
 }
 
@@ -162,7 +198,7 @@ LC longest_consecutive(uvec numbers){
         lc.length = mx;
     }
     for(int n=0; n < mx; n++){
-        idx(n) = index +n;
+        idx(n) = numbers[index +n];
     }
 
 

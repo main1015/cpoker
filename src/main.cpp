@@ -42,15 +42,24 @@ int main() {
 
 
     Card hands[5] = {
-            Card{3, 0},
-            Card{5, 1},
-            Card{2, 0},
-            Card{5, 3},
-            Card{4, 0},
+//            Card{3, 0},
+//            Card{5, 1},
+//            Card{2, 0},
+//            Card{5, 3},
+//            Card{14, 0},
+
+            Card{11, 2},
+            Card{13, 1},
+            Card{10, 2},
+            Card{13, 3},
+            Card{8, 3},
     };
     Card cards[2] = {
-            Card{14, 0},
-            Card{5, 0},
+//            Card{4, 0},
+//            Card{5, 0},
+
+            Card{14, 2},
+            Card{13, 2},
     };
 
     int hl = sizeof(hands) / sizeof(hands[0]);

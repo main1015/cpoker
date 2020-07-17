@@ -32,7 +32,7 @@ CR has_max_three(imat pokers, imat numbers, imat colors);
 CR has_max_two(imat pokers, imat numbers, imat colors);
 CR has_max_one(imat pokers, imat numbers, imat colors);
 
-CR has_straight_with_flush(CR* cr, imat pokers, imat numbers, imat colors);
+void has_straight_with_flush(CR* cr, imat pokers, imat numbers, imat colors);
 SR is_straight(imat numbers);
 LC longest_consecutive(uvec numbers);
 
