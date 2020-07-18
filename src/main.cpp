@@ -49,17 +49,17 @@ int main() {
 //            Card{14, 0},
 
             Card{11, 2},
-            Card{13, 1},
+            Card{12, 2},
             Card{10, 2},
-            Card{13, 3},
-            Card{8, 3},
+            Card{7, 3},
+            Card{6, 0},
 
     };
     Card cards[2] = {
 //            Card{4, 0},
 //            Card{5, 0},
 
-            Card{14, 2},
+            Card{8, 2},
             Card{13, 2},
     };
 

@@ -5,7 +5,36 @@
 #include "assemble.h"
 
 CR has_max_four(imat pokers, imat numbers, imat colors){
+    /*
+     * 最大含有4个相同
+     * */
     CR cr;
+    cr.model = UNKNOWN;
+    cr.cards.zeros(13, 4);
+    uvec b = find(numbers.col(0) == 4 );
+    if(!b.is_empty()){
+        // 4,3; 4,2,1; 4,1,1,1
+        int index = b[0];
+        cr.model = FOUR_OF_A_KIND;
+        cr.cards.row(index) = pokers.row(index);
+        int ix = 0;
+        for(int i=13-1; i >= 0; i--){
+            int n = numbers(i, 0);
+            if(n>0 && n!=4){
+                ix = i;
+                break;
+            }
+        }
+        imat row = pokers.row(ix);
+        for(int i=0; i<4; i++){
+            if(row[i]){
+                cr.cards(ix, i) = 1;
+                break;
+            }
+        }
+    }
+
+
     return cr;
 }
 CR has_max_three(imat pokers, imat numbers, imat colors){
@@ -51,8 +80,8 @@ CR has_max_three(imat pokers, imat numbers, imat colors){
             }
         }else{
             // 3,1,1,1,1
-            has_straight_with_flush(&cr, pokers, numbers, colors);
             // 出现大于5张同色的牌
+            has_straight_with_flush(&cr, pokers, numbers, colors);
             if(cr.model == UNKNOWN){
                 // 三条
                 cr.model = THREE_ARTICLE;
@@ -70,11 +99,111 @@ CR has_max_three(imat pokers, imat numbers, imat colors){
     return cr;
 }
 CR has_max_two(imat pokers, imat numbers, imat colors){
+    /*
+     * 最大含有2个相同
+     * */
     CR cr;
+    cr.model = UNKNOWN;
+    cr.cards.zeros(13, 4);
+    uvec b = find(numbers.col(0) == 2 );
+    if(!b.is_empty()){
+        int size = b.size();
+        if(size == 3){
+            // 2,2,2,1
+            cr.model = TWO_PAIR;
+            cr.cards.row(b[1]) = pokers.row(b[1]);
+            cr.cards.row(b[2]) = pokers.row(b[2]);
+            uvec nb = find(numbers.col(0) == 1 );
+            if(!nb.is_empty() && nb[0] > b[0]){
+                for(int i=0;i<4;i++){
+                    if(pokers(nb[0], i)){
+                        cr.cards(nb[0], i) = 1;
+                        break;
+                    }
+                }
+            }else{
+                for(int i=0;i<4;i++){
+                    if(pokers(b[0], i)){
+                        cr.cards(b[0], i) = 1;
+                        break;
+                    }
+                }
+            }
+        }else{
+            // 2,2,1,1,1
+            // 2,1,1,1,1,1
+            // 出现大于5张同色的牌
+            has_straight_with_flush(&cr, pokers, numbers, colors);
+            if(cr.model == UNKNOWN){
+                if(size == 2){
+                    // 2,2,1,1,1
+                    cr.model = TWO_PAIR;
+                    cr.cards.row(b[0]) = pokers.row(b[0]);
+                    cr.cards.row(b[1]) = pokers.row(b[1]);
+                    uvec nb = find(numbers.col(0) == 1 );
+                    int size = nb.size();
+                    int ix = size - 1;
+                    for(int i=0;i<4;i++){
+                        if(pokers(nb[ix], i)){
+                            cr.cards(nb[ix], i) = 1;
+                            break;
+                        }
+                    }
+                }else{
+                    // 2,1,1,1,1,1
+                    cr.model = ONE_PAIR;
+                    cr.cards.row(b[0]) = pokers.row(b[0]);
+                    uvec nb = find(numbers.col(0) == 1 );
+                    int size = nb.size();
+                    int mx = size - 3;
+                    int j = size - 1;
+                    for(; j >= mx; j--){
+                        for(int i=0;i<4;i++){
+                            if(pokers(nb[j], i)){
+                                cr.cards(nb[j], i) = 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     return cr;
 }
 CR has_max_one(imat pokers, imat numbers, imat colors){
+    /**
+     * 最大含有1个相同
+     */
+     // 1,1,1,1,1,1,1
     CR cr;
+    cr.model = UNKNOWN;
+    cr.cards.zeros(13, 4);
+    // 出现大于5张同色的牌
+    has_straight_with_flush(&cr, pokers, numbers, colors);
+    if(cr.model == UNKNOWN){
+        // 1,1,1,1,1,1,1
+        cr.model = HIGH_CARD;
+        int ix[5];
+        for(int i=13-1, j=0; i >= 0, j<5; i--){
+            int n = numbers(i, 0);
+            if(n){
+                ix[j] = i;
+                j++;
+            }
+        }
+
+        for(int j=0;j<5;j++){
+            imat row = pokers.row(ix[j]);
+            for(int i=0; i<4; i++){
+                if(row[i]){
+                    cr.cards(ix[j], i) = 1;
+                    break;
+                }
+            }
+        }
+
+    }
     return cr;
 }
 
